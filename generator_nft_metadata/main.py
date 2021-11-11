@@ -2,8 +2,8 @@ import hashlib
 import json
 import math
 import os
+import random
 from pathlib import Path
-from random import randint
 
 from PIL import Image
 from config import STRUCT
@@ -18,7 +18,7 @@ def main():
     output_json = 'final_json'
     final_image = None
     layer_dict = STRUCT.get('layer_order')
-    size = 324
+    size = 100
     all_dna = []
     fail_list_nbr = []
 
@@ -85,15 +85,22 @@ def count_files(layer):
     path_name = Path(__file__).parents[0]
     img_path_name = f"layers/{layer.get('name')}"
     posix_all_files = Path(f'{path_name}/{img_path_name}').glob('**/*')
-    all_files_list = [x for x in posix_all_files if x.is_file()]
+    all_files_list = [str(x) for x in posix_all_files if x.is_file()]
     qtd_files = len(all_files_list)
     return all_files_list, qtd_files
 
 
 def randon_choose_file(layer):
     all_files_list, qtd_files = count_files(layer)
-    index_file = randint(0, qtd_files - 1)
-    file_choose = str(all_files_list[index_file])
+
+    rarity = []
+    for path_file in all_files_list:
+        perc = path_file.split('/')[-1].split('.')[0].split('#')[1]
+        rarity.append(int(perc))
+
+    path_file_list = random.choices(all_files_list, weights=rarity, k=1)
+    index_file = all_files_list.index(path_file_list[0])
+    file_choose = path_file_list[0]
     return index_file, file_choose
 
 
